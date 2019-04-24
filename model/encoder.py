@@ -14,10 +14,16 @@ class EncoderRNN(nn.Module):
         self.gru = nn.GRU(hidden_size, hidden_size, num_layers = 4)
 
     def forward(self, input, hidden):
-        embedded = self.embedding(input).view(1, 1, -1)
-        output = embedded
-        output, hidden = self.gru(output, hidden)
+        #print(input.shape)
+        #embedded = self.embedding(input).view(1, 1, -1)
+        embedded = self.embedding(input).permute(1, 0, 2)
+        #print(embedded.shape)
+        #output = embedded
+        output, hidden = self.gru(embedded, hidden)
         return output, hidden
 
-    def initHidden(self):
-        return torch.zeros(4, 1, self.hidden_size, device=device)
+    def initHidden(self, batch_size, evaluate):
+        if evaluate:
+            return torch.zeros(4, 1, self.hidden_size, device=device)
+        else:
+            return torch.zeros(4, batch_size, self.hidden_size, device=device)

@@ -18,9 +18,9 @@ import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MAX_LENGTH = 10
-SOS_token = 0
-EOS_token = 1
+MAX_LENGTH = 5
+SOS_token = 1
+EOS_token = 2
 
 eng_prefixes = (
 	"i am ", "i m ",
@@ -94,8 +94,8 @@ class Lang:
 
 def filterPair(p):
 	return len(p[0].split(' ')) < MAX_LENGTH and \
-		len(p[1].split(' ')) < MAX_LENGTH
-		#p[1].startswith(eng_prefixes)
+		len(p[1].split(' ')) < MAX_LENGTH and \
+		p[1].startswith(eng_prefixes)
 
 
 def filterPairs(pairs):
@@ -118,27 +118,30 @@ def prepareData(lang1, lang2, reverse=False):
 
 
 def pad_sequences(x, max_len):
-    padded = np.zeros((max_len), dtype=np.int64)
+    padded = torch.zeros((max_len), dtype=torch.long, device=device)
     if len(x) > max_len: padded[:] = x[:max_len]
     else:
-    	print(padded)
-    	print(x)
+    	#print(padded)
+    	#print(x)
     	padded[:len(x)] = x
     return padded
 
 
 def indexesFromSentence(lang, sentence):
-    return [lang.word2index[word] for word in sentence.split(' ')]
+	#print(lang.word2index[word] for word in sentence.split(' '))
+	return [lang.word2index[word] for word in sentence.split(' ')]
 
 
 def tensorFromSentence(lang, sentence):
     indexes = indexesFromSentence(lang, sentence)
+    #print(indexes)
     indexes.append(EOS_token)
-    return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
+    return torch.tensor(indexes, dtype=torch.long, device=device)
 
 
 def tensorsFromPair(pair, input_lang, output_lang):
     input_tensor = tensorFromSentence(input_lang, pair[0])
+    #print(input_tensor)
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
 

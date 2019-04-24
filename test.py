@@ -28,7 +28,7 @@ class Dataset(data.Dataset):
         return x, y
 
 def load_data(dataset, batch_size):
-    dataloader = data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=False)
+    dataloader = data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0, drop_last=True)
     return dataloader
 
 def trainIters(encoder, decoder, n_iters, pairs, input_lang, output_lang, print_every=10, plot_every=100, learning_rate=0.01):
@@ -51,31 +51,33 @@ def trainIters(encoder, decoder, n_iters, pairs, input_lang, output_lang, print_
     #print(y_pair.shape)
     #print(x_pair[0])
     #print(pairs[0])
-    #x_pair = [pad_sequences(x, MAX_LENGTH) for x in x_pair]
-    #y_pair = [pad_sequences(x, MAX_LENGTH) for x in y_pair]
+    x_pair = [pad_sequences(x, MAX_LENGTH) for x in x_pair]
+    #print("padded x")
+    #print(x_pair)
+    y_pair = [pad_sequences(x, MAX_LENGTH) for x in y_pair]
     training_set = Dataset(x_pair, y_pair)
     training_iterator = load_data(training_set, batch_size)
     #training_pairs = [tensorsFromPair(random.choice(pairs), input_lang, output_lang)
     #                  for i in range(n_iters)]
     criterion = nn.NLLLoss()
 
-    for epoch in range(6):
+    for epoch in range(20):
         print('epocj')
         print(epoch)
         i = 0
         for input_tensor, target_tensor in training_iterator:
             #print(input_tensor)
             #print(target_tensor)
-            loss = train(input_tensor, target_tensor, encoder,
+            loss = train(batch_size, input_tensor, target_tensor, encoder,
                      decoder, encoder_optimizer, decoder_optimizer, criterion)
             i += 1
             #print(i)
             print_loss_total += loss
             plot_loss_total += loss
 
-            if i % 5000 == 0:
+            if i % 100 == 0:
                 print(i)
-                print_loss_avg = print_loss_total / 5000
+                print_loss_avg = print_loss_total / 100
                 print_loss_total = 0
                 print('%s (%d %d%%) %.4f' % (timeSince(start, (epoch+1) / 100),
                                              epoch+1, (epoch+1) / 100 * 100, print_loss_avg))
@@ -85,7 +87,7 @@ def trainIters(encoder, decoder, n_iters, pairs, input_lang, output_lang, print_
                 plot_losses.append(plot_loss_avg)
                 plot_loss_total = 0
 
-        showPlot(plot_losses)
+        #showPlot(plot_losses)
 
 
 
