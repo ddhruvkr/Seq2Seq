@@ -16,8 +16,6 @@ def train(batch_size, input_tensor, target_tensor, encoder, decoder, encoder_opt
     input_length = input_tensor.size(1)
     target_length = max_length
 
-    encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
-
     loss = 0
     encoder_output, encoder_hidden = encoder(input_tensor, encoder_hidden)
     decoder_input = torch.full((batch_size, 1), SOS_token, device=device, dtype=torch.int64)
