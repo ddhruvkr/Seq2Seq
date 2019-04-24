@@ -33,89 +33,50 @@ def load_data(dataset, batch_size):
 
 def trainIters(encoder, decoder, n_iters, pairs, input_lang, output_lang, print_every=10, plot_every=100, learning_rate=0.01):
     start = time.time()
-    batch_size = 1
+    batch_size = 5
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
     plot_loss_total = 0  # Reset every plot_every
-
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
-    #print(pairs)
+    # TODO: use better optimizer
     x_pair = []
     y_pair = []
     for i in range(len(pairs)):
         pair = tensorsFromPair(pairs[i], input_lang, output_lang)
         x_pair.append(pair[0])
         y_pair.append(pair[1])
-    #print(x_pair.shape)
-    #print(y_pair.shape)
-    #print(x_pair[0])
-    #print(pairs[0])
+
     x_pair = [pad_sequences(x, MAX_LENGTH) for x in x_pair]
-    #print("padded x")
-    #print(x_pair)
     y_pair = [pad_sequences(x, MAX_LENGTH) for x in y_pair]
+    # TODO: this could be made to MAX_LENGTH in this batch
     training_set = Dataset(x_pair, y_pair)
     training_iterator = load_data(training_set, batch_size)
-    #training_pairs = [tensorsFromPair(random.choice(pairs), input_lang, output_lang)
-    #                  for i in range(n_iters)]
+    
     criterion = nn.NLLLoss()
-
-    for epoch in range(20):
-        print('epocj')
-        print(epoch)
+    epochs = 5
+    for epoch in range(epochs):
+        print('epoch')
+        print(epoch+1)
         i = 0
         for input_tensor, target_tensor in training_iterator:
-            #print(input_tensor)
-            #print(target_tensor)
             loss = train(batch_size, input_tensor, target_tensor, encoder,
                      decoder, encoder_optimizer, decoder_optimizer, criterion)
             i += 1
-            #print(i)
             print_loss_total += loss
             plot_loss_total += loss
 
             if i % 100 == 0:
-                print(i)
                 print_loss_avg = print_loss_total / 100
                 print_loss_total = 0
-                print('%s (%d %d%%) %.4f' % (timeSince(start, (epoch+1) / 100),
-                                             epoch+1, (epoch+1) / 100 * 100, print_loss_avg))
+                iters = epoch*len(pairs) + (batch_size*i)
+                n_iters = epochs*len(pairs)
+                print('%s (%d%%) %.4f' % (timeSince(start, iters/n_iters),
+                                             iters / n_iters * 100, print_loss_avg))
 
-            if i % plot_every == 0:
+            '''if i % plot_every == 0:
                 plot_loss_avg = plot_loss_total / plot_every
                 plot_losses.append(plot_loss_avg)
-                plot_loss_total = 0
+                plot_loss_total = 0'''
 
         #showPlot(plot_losses)
-
-
-
-
-
-
-
-
-
-    '''for iter in range(1, n_iters + 1):
-        training_pair = training_pairs[iter - 1]
-        input_tensor = training_pair[0]
-        target_tensor = training_pair[1]
-
-        loss = train(input_tensor, target_tensor, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion)
-        print_loss_total += loss
-        plot_loss_total += loss
-
-        if iter % print_every == 0:
-            print_loss_avg = print_loss_total / print_every
-            print_loss_total = 0
-            print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
-                                         iter, iter / n_iters * 100, print_loss_avg))
-
-        if iter % plot_every == 0:
-            plot_loss_avg = plot_loss_total / plot_every
-            plot_losses.append(plot_loss_avg)
-            plot_loss_total = 0
-
-    showPlot(plot_losses)'''

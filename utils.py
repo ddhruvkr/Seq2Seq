@@ -94,8 +94,8 @@ class Lang:
 
 def filterPair(p):
 	return len(p[0].split(' ')) < MAX_LENGTH and \
-		len(p[1].split(' ')) < MAX_LENGTH and \
-		p[1].startswith(eng_prefixes)
+		len(p[1].split(' ')) < MAX_LENGTH #and \
+		#p[1].startswith(eng_prefixes)
 
 
 def filterPairs(pairs):
@@ -121,27 +121,22 @@ def pad_sequences(x, max_len):
     padded = torch.zeros((max_len), dtype=torch.long, device=device)
     if len(x) > max_len: padded[:] = x[:max_len]
     else:
-    	#print(padded)
-    	#print(x)
     	padded[:len(x)] = x
     return padded
 
 
 def indexesFromSentence(lang, sentence):
-	#print(lang.word2index[word] for word in sentence.split(' '))
 	return [lang.word2index[word] for word in sentence.split(' ')]
 
 
 def tensorFromSentence(lang, sentence):
     indexes = indexesFromSentence(lang, sentence)
-    #print(indexes)
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device)
 
 
 def tensorsFromPair(pair, input_lang, output_lang):
     input_tensor = tensorFromSentence(input_lang, pair[0])
-    #print(input_tensor)
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
 
