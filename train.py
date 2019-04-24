@@ -12,17 +12,22 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
-
-    input_length = input_tensor.size(0)
-    target_length = target_tensor.size(0)
+    #print(input_tensor)
+    #print(target_tensor.size(1))
+    input_length = input_tensor.size(1)
+    target_length = target_tensor.size(1)
 
     encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
 
     loss = 0
 
     for ei in range(input_length):
+        print(target_tensor.shape)
+        #print(target_tensor)
         encoder_output, encoder_hidden = encoder(
-            input_tensor[ei], encoder_hidden)
+            input_tensor[0][ei], encoder_hidden)
+        #print(encoder_output)
+        #print(encoder_output[0,0])
         encoder_outputs[ei] = encoder_output[0, 0]
 
     decoder_input = torch.tensor([[SOS_token]], device=device)
@@ -30,13 +35,12 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
     decoder_hidden = encoder_hidden
 
     use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
-
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_hidden, encoder_outputs)
-            loss += criterion(decoder_output, target_tensor[di])
-            decoder_input = target_tensor[di]  # Teacher forcing
+            loss += criterion(decoder_output, target_tensor[0][di])
+            decoder_input = target_tensor[0][di]  # Teacher forcing
 
     else:
         # Without teacher forcing: use its own predictions as the next input
@@ -45,7 +49,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()  # detach from history as input
 
-            loss += criterion(decoder_output, target_tensor[di])
+            loss += criterion(decoder_output, target_tensor[0][di])
             if decoder_input.item() == EOS_token:
                 break
 

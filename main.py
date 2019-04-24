@@ -13,8 +13,8 @@ print(random.choice(pairs))
 
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 #decoder1 = DecoderRNN(hidden_size, output_lang.n_words).to(device)
-attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
+attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, MAX_LENGTH, dropout_p=0.1).to(device)
 
-trainIters(encoder1, attn_decoder1, 75000, pairs, input_lang, output_lang, print_every=5000)
+trainIters(encoder1, attn_decoder1, 10000, pairs, input_lang, output_lang, print_every=5000)
 
-evaluateRandomly(encoder1, attn_decoder1)
+evaluateRandomly(encoder1, attn_decoder1, pairs, input_lang, output_lang)

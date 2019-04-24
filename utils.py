@@ -37,8 +37,8 @@ class Lang:
 		self.name = name
 		self.word2index = {}
 		self.word2count = {}
-		self.index2word = {0: "SOS", 1: "EOS"}
-		self.n_words = 2  # Count SOS and EOS
+		self.index2word = {1: "SOS", 2: "EOS", 0: "PAD"}
+		self.n_words = 3  # Count SOS and EOS
 
 	def addSentence(self, sentence):
 		for word in sentence.split(' '):
@@ -94,8 +94,8 @@ class Lang:
 
 def filterPair(p):
 	return len(p[0].split(' ')) < MAX_LENGTH and \
-		len(p[1].split(' ')) < MAX_LENGTH and \
-		p[1].startswith(eng_prefixes)
+		len(p[1].split(' ')) < MAX_LENGTH
+		#p[1].startswith(eng_prefixes)
 
 
 def filterPairs(pairs):
@@ -117,7 +117,14 @@ def prepareData(lang1, lang2, reverse=False):
 	return input_lang, output_lang, pairs
 
 
-
+def pad_sequences(x, max_len):
+    padded = np.zeros((max_len), dtype=np.int64)
+    if len(x) > max_len: padded[:] = x[:max_len]
+    else:
+    	print(padded)
+    	print(x)
+    	padded[:len(x)] = x
+    return padded
 
 
 def indexesFromSentence(lang, sentence):

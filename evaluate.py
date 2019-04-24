@@ -1,6 +1,6 @@
 from utils import *
 
-def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
+def evaluate(encoder, decoder, sentence, input_lang, output_lang, max_length=MAX_LENGTH):
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         input_length = input_tensor.size()[0]
@@ -35,12 +35,12 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
         return decoded_words, decoder_attentions[:di + 1]
 
-def evaluateRandomly(encoder, decoder, n=10):
+def evaluateRandomly(encoder, decoder, pairs, input_lang, output_lang, n=10):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
         print('=', pair[1])
-        output_words, attentions = evaluate(encoder, decoder, pair[0])
+        output_words, attentions = evaluate(encoder, decoder, pair[0], input_lang, output_lang)
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
